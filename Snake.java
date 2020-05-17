@@ -1,6 +1,8 @@
 import javafx.application.*;
 import javafx.stage.Stage;
 import javafx.scene.*;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
@@ -77,27 +79,31 @@ public class GameScene extends Application {
                 setTranslateY(getTranslateY() + 1);
             }
         }
-
+        
+        // Adds a piece depending on direction of current rectangle
+        // Should only be used on last piece in snake
         void grow(){
             Player bod = new Player(20, 20);
-            if(up == true){      
-                bod.setTranslateX(getTranslateX() - 20);
-                bod.setTranslateY(getTranslateY() - 20);
-            }
-             if(down == true){      
-                bod.setTranslateX(getTranslateX() - 20);
-                bod.setTranslateY(getTranslateY() - 20);
-            }
-            if(left == true){      
-                bod.setTranslateX(getTranslateX() - 20);
-                bod.setTranslateY(getTranslateY() - 20);
-            }
-            if(right == true){      
-                bod.setTranslateX(getTranslateX() - 20);
-                bod.setTranslateY(getTranslateY() - 20);
-            }
-            
-            snake.add(bod);
+         if(length < snake.size()) {
+	            if(up){      
+	                bod.setTranslateX(getTranslateX() - 20);
+	                bod.setTranslateY(getTranslateY() - 20);
+	            }
+	             if(down){      
+	                bod.setTranslateX(getTranslateX() - 20);
+	                bod.setTranslateY(getTranslateY() - 20);
+	            }
+	            if(left){      
+	                bod.setTranslateX(getTranslateX() - 20);
+	                bod.setTranslateY(getTranslateY() - 20);
+	            }
+	            if(right){      
+	                bod.setTranslateX(getTranslateX() - 20);
+	                bod.setTranslateY(getTranslateY() - 20);
+	            }
+	            length++;
+	            snake.add(bod);
+         }
            // root.getChildren().add(bod);   
         }
     } 
@@ -122,10 +128,18 @@ public class GameScene extends Application {
    
     @Override
     public void start(Stage primarystage) throws Exception{
-   //    Rectangle snake = new Rectangle(50,50,50,50);
-//       Group root = new Group(snake);
-        snake.add(head);
-        Group root = new Group(snake.get(0));
+    	
+
+    	
+        snake.add(head); // this will be the part which is controlled
+        
+        Group root = new Group();
+        
+    	Canvas canvas = new Canvas(500,500);
+    	GraphicsContext gc = canvas.getGraphicsContext2D();
+    	
+    	root.getChildren().add(snake.get(0));
+    	
         Scene scene = new Scene(root, 500, 500);
         primarystage.setTitle("Snake");
         
@@ -148,7 +162,31 @@ public class GameScene extends Application {
                 snake.get(0).moveRight();
             }
         });
+        
 
+        new AnimationTimer() {
+
+			@Override
+			public void handle(long now) {
+
+				if(snake.get(0).left) {
+					snake.get(0).moveLeft();
+				}
+				else if(snake.get(0).right) {
+					snake.get(0).moveRight();
+				}
+				else if(snake.get(0).up) {
+					snake.get(0).moveUp();
+				}
+				else if(snake.get(0).down) {
+					snake.get(0).moveDown();
+				}
+				
+			}
+        	
+        }.start();
+        
+        
         primarystage.show();
     }
 
