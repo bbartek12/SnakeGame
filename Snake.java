@@ -13,7 +13,7 @@ import java.util.*;
 
 // walk arraylist and move head up by size of block and put previous node to current node's position
 
-public class Snake extends Application {
+public class GameScene extends Application {
 
     Player head = new Player(250, 250);
     ArrayList<Player> snake = new ArrayList<Player>(5);
@@ -26,12 +26,16 @@ public class Snake extends Application {
         boolean left = false;
         boolean right = false;
         int length;
+        int posX;
+        int posY;
 
         Player(int x, int y){
 
             super(20, 20); // overwrites rectangle classes
    //         dead = false;
             length = 0;
+  //          this.posX = x;
+    //        this.posY = y;
             setTranslateX(x);
             setTranslateY(y);
         }
@@ -98,7 +102,24 @@ public class Snake extends Application {
         }
     } 
     
-    
+    // Shifts entire snake
+   // Since each piece must follow each other we scan array of pieces and shift each in reverse order
+   // Move current piece into position of previous piece
+   void follow(ArrayList<Player> snake) {
+	   
+	   ListIterator<Player> li = snake.listIterator(snake.size());
+	   
+	   while(li.hasPrevious()) {
+		 
+		 Player prev =   snake.get(li.previousIndex()); // previous snake piece
+		 snake.get(li.previousIndex() +1).setTranslateX(prev.getTranslateX()); // current snake piece get previous snake x position
+		 snake.get(li.previousIndex() +1).setTranslateY(prev.getTranslateY()); // current snake piece get previous snake y position
+
+		 li.previous();
+	   }
+	   
+   }
+   
     @Override
     public void start(Stage primarystage) throws Exception{
    //    Rectangle snake = new Rectangle(50,50,50,50);
