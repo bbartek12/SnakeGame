@@ -20,7 +20,10 @@ public class GameScene extends Application {
     Player head = new Player(250, 250);
     ArrayList<Player> snake = new ArrayList<Player>(20);
     Group root = new Group();
-    boolean start = true;
+    boolean up = false;
+    boolean down = false;
+    boolean left = false;
+    boolean right = false;
 
   
 
@@ -142,27 +145,22 @@ public class GameScene extends Application {
 	  
 	   
 	   if(snake.size() > 1) {
-		   snake.get(1).setTranslateX(posX);
-		   snake.get(1).setTranslateY(posY);
+		   
 	   
 		   for(int i = snake.size()-1; i > 0; i--) {
+			   
+			   if(i == 1) {
+				   snake.get(1).setTranslateX(posX);
+				   snake.get(1).setTranslateY(posY);
+			   }
+			   else {
 			   
 			   
 				   snake.get(i).setTranslateX(snake.get(i-1).getTranslateX());
 			   
 			  
 				   snake.get(i).setTranslateY(snake.get(i-1).getTranslateY());
-		/*		   if( !snake.get(1).intersects(snake.get(i-1).getTranslateX(), snake.get(i-1).getTranslateY(), 20, 20)){
-					   if(i>1)
-					   System.out.println("yay");
-				   }
-				   if( !snake.get(i).intersects(snake.get(i-1).getTranslateX(), snake.get(i-1).getTranslateY(), 20, 20)) {
-					   if(i>1)
-					   System.out.println("yay");
-
-					   
-				   }
-		  */
+			   }
 		   }
    }
 		   
@@ -206,7 +204,7 @@ public class GameScene extends Application {
   
     	growSnake();
 
-  //  	growSnake();
+    	growSnake();
     
 
     	
@@ -226,7 +224,7 @@ public class GameScene extends Application {
             }
             else if(e.getCode() == KeyCode.A){
                 snake.get(0).moveLeft();
-            //    growSnake(); // DEBUG - growth + follow
+             //   growSnake(); // DEBUG - growth + follow
             }
             else if(e.getCode() == KeyCode.S){
                 snake.get(0).moveDown();
@@ -241,6 +239,7 @@ public class GameScene extends Application {
 
         new AnimationTimer() {
         	int counter = 0;
+        	boolean test = false;
         	
 			@Override
 			public void handle(long now) {
@@ -250,10 +249,10 @@ public class GameScene extends Application {
 				double posX = snake.get(0).getTranslateX();
 				double posY = snake.get(0).getTranslateY();
 				
-				
+			//	if(test)
 				follow(posX,posY);
 				
-				
+				test = true;
 				if(snake.get(0).left) {
 					snake.get(0).goLeft();
 				}
