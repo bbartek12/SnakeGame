@@ -25,8 +25,6 @@ public class GameScene extends Application {
     boolean left = false;
     boolean right = false;
 
-  
-
    public  class Player extends Rectangle{
         boolean isDead = false;
         boolean up = false;
@@ -38,52 +36,50 @@ public class GameScene extends Application {
         Player(int x, int y){
 
             super(20, 20); // overwrites rectangle classes
-   //         dead = false;
             length = 0;
-  //          this.posX = x;
-    //        this.posY = y;
             setTranslateX(x);
             setTranslateY(y);
         }
 
+        // set snake to move left
         void moveLeft(){
             if(!right){ // block from moving opposite direction
             	left = true;
             	right = false;
             	up = false;
             	down = false;
-            //    setTranslateX(getTranslateX() - 20);
             }
         }
-
+        
+        // set snake to move right
         void moveRight(){
-            if(!left){
+            if(!left){ // block from moving opposite direction
             	left = false;
             	right = true;
             	up = false;
             	down = false;
-         //       setTranslateX(getTranslateX() + 20);
             }
         }
+        
+        // set snake to move up
         void moveUp(){
-            if(!down){
+            if(!down){ // block from moving opposite direction
             	left = false;
             	right = false;
             	up = true;
             	down = false;
-       //     	setTranslateY(getTranslateY() - 20);
             }
         }
         void moveDown(){
-            if(!up){
+            if(!up){ // block from moving opposite direction
             	left = false;
             	right = false;
             	up = false;
             	down = true;
-         //       setTranslateY(getTranslateY() + 20);
             }
         }
         
+        // Actually shift the snake in the direction it is set to move
         void goLeft() {
         	if(!right){
         		setTranslateX(getTranslateX() - 20);
@@ -111,7 +107,7 @@ public class GameScene extends Application {
         // Should only be used on last piece in snake
         void grow(){
             Player bod = new Player(250, 250);
-         if(length < snake.size()) {
+            if(length < snake.size()) {
 	            if(up){      
 	                bod.setTranslateX(getTranslateX());
 	                bod.setTranslateY(getTranslateY() + 20);
@@ -131,8 +127,7 @@ public class GameScene extends Application {
 	            length++;
 	            snake.add(bod);
 	            root.getChildren().add(bod); // add to group to make it visible
-         }
-           // root.getChildren().add(bod);   
+            }
         }
     } 
     
@@ -140,34 +135,23 @@ public class GameScene extends Application {
    // Since each piece must follow each other we scan array of pieces and shift each in reverse order
    // Move current piece into position of previous piece
    void follow(double posX, double posY) {
-	   
-
-	  
-	   
+   
 	   if(snake.size() > 1) {
-		   
-	   
 		   for(int i = snake.size()-1; i > 0; i--) {
 			   
-			   if(i == 1) {
+			   if(i == 1) { // prevents from first piece being overlapped
 				   snake.get(1).setTranslateX(posX);
 				   snake.get(1).setTranslateY(posY);
 			   }
 			   else {
-			   
-			   
-				   snake.get(i).setTranslateX(snake.get(i-1).getTranslateX());
-			   
-			  
+				   snake.get(i).setTranslateX(snake.get(i-1).getTranslateX());			   			  
 				   snake.get(i).setTranslateY(snake.get(i-1).getTranslateY());
 			   }
 		   }
-   }
-		   
-		   
-	    //}
+	   }
    }
    
+   // Creates snake if there is none or adds a piece to end of the body
    void growSnake() {
 	   	   if(snake.size() == 0) {
 	   		  Player bod = new Player(250, 250);
@@ -178,43 +162,23 @@ public class GameScene extends Application {
 	   		   snake.get(snake.size()-1).grow(); // grow from last index
 	   	   }
    }
+   
+   
    void snakeAteFruit() {
 	   
    }
    
     @Override
     public void start(Stage primarystage) throws Exception{
-    	
 
-    	
-    //    snake.add(head); // this will be the part which is controlled
-        
-        
-        
-    //	Canvas canvas = new Canvas(500,500);
-  //  	GraphicsContext gc = canvas.getGraphicsContext2D();
-        
-       
-        
-    //	root.getChildren().addAll(snake.get(0));
-    	
-    	
-        
-    	growSnake();
-  
-    	growSnake();
-
-    	growSnake();
-    
-
-    	
         Scene scene = new Scene(root, 500, 500);
         primarystage.setTitle("Snake");
-        
-        
         primarystage.setScene(scene);
-
         
+        // Start snake with length of 3
+        growSnake();
+    	growSnake();
+    	growSnake();
         
         // button input uses player object functions
         scene.setOnKeyPressed(e-> {
@@ -231,45 +195,38 @@ public class GameScene extends Application {
             }
             else if(e.getCode() == KeyCode.D){
                 snake.get(0).moveRight();
-            }
-            
-
+            }        
         });
         
 
+        // Animates constant movement
         new AnimationTimer() {
         	int counter = 0;
-        	boolean test = false;
-        	
+
 			@Override
 			public void handle(long now) {
 				
-				if(counter %30 == 0) {
-					
-				double posX = snake.get(0).getTranslateX();
-				double posY = snake.get(0).getTranslateY();
-				
-			//	if(test)
-				follow(posX,posY);
-				
-				test = true;
-				if(snake.get(0).left) {
-					snake.get(0).goLeft();
-				}
-				else if(snake.get(0).right) {
-					snake.get(0).goRight();
-				}
-				else if(snake.get(0).up) {
-					snake.get(0).goUp();
-				}
-				else if(snake.get(0).down) {
-					snake.get(0).goDown();
-				}
+				if(counter %30 == 0) { // slow down fps of the game
+						
+					double posX = snake.get(0).getTranslateX();
+					double posY = snake.get(0).getTranslateY();
 
-				
-				
-			}
-			counter++;
+					follow(posX,posY);
+					
+					if(snake.get(0).left) {
+						snake.get(0).goLeft();
+					}
+					else if(snake.get(0).right) {
+						snake.get(0).goRight();
+					}
+					else if(snake.get(0).up) {
+						snake.get(0).goUp();
+					}
+					else if(snake.get(0).down) {
+						snake.get(0).goDown();
+					}			
+				}
+				counter++;
 			}
         	
         }.start();
@@ -279,7 +236,7 @@ public class GameScene extends Application {
     }
 
 
-
+    // launch application
     public static void main(String[] args){
         launch(args);
     }
