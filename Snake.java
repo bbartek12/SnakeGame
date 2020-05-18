@@ -139,19 +139,32 @@ public class GameScene extends Application {
    void follow(double posX, double posY) {
 	   
 
-	  
+	  double x;
+	  double y;
 	   
 	   if(snake.size() > 1) {
+		   x = snake.get(1).getTranslateX();
+		   y = snake.get(1).getTranslateY();
+		   
 		   snake.get(1).setTranslateX(posX);
 		   snake.get(1).setTranslateY(posY);
-	   
-		   for(int i = snake.size()-1; i > 0; i--) {
+		   
+		   for(int i = 1; i< snake.size()-1; i++) {
+			   		
+			   if(i < snake.size()-1) {
+			   		posX = snake.get(i+1).getTranslateX();
+			   		posY = snake.get(i+1).getTranslateY();
 			   
 			   
-				   snake.get(i).setTranslateX(snake.get(i-1).getTranslateX());
+				   snake.get(i+1).setTranslateX(x);
 			   
 			  
-				   snake.get(i).setTranslateY(snake.get(i-1).getTranslateY());
+				   snake.get(i+1).setTranslateY(y);
+			   }   
+				   x= posX;
+				   y= posY;
+				   
+				   
 		/*		   if( !snake.get(1).intersects(snake.get(i-1).getTranslateX(), snake.get(i-1).getTranslateY(), 20, 20)){
 					   if(i>1)
 					   System.out.println("yay");
@@ -206,7 +219,7 @@ public class GameScene extends Application {
   
     	growSnake();
 
-  //  	growSnake();
+    	growSnake();
     
 
     	
