@@ -17,18 +17,21 @@ import java.util.*;
 
 public class GameScene extends Application {
 
-    Player head = new Player(250, 250);
-    ArrayList<Player> snake = new ArrayList<Player>(5);
+   // Player head = new Player(250, 250);
+    ArrayList<Player> snake = new ArrayList<Player>(20);
     Group root = new Group();
-    double posX;
-    double posY;
+    boolean pL = false;
+    boolean pR = false;
+    boolean pU = false;
+    boolean pD = false;
+
 
   
 
    public  class Player extends Rectangle{
         boolean isDead = false;
         boolean up = false;
-        boolean down = true;
+        boolean down = false;
         boolean left = false;
         boolean right = false;
         int length;
@@ -42,6 +45,7 @@ public class GameScene extends Application {
     //        this.posY = y;
             setTranslateX(x);
             setTranslateY(y);
+            down = true;
         }
 
         void moveLeft(){
@@ -108,7 +112,7 @@ public class GameScene extends Application {
         // Adds a piece depending on direction of current rectangle
         // Should only be used on last piece in snake
         void grow(){
-            Player bod = new Player(20, 20);
+            Player bod = new Player(250, 250);
          if(length < snake.size()) {
 	            if(up){      
 	                bod.setTranslateX(getTranslateX());
@@ -139,37 +143,48 @@ public class GameScene extends Application {
    // Move current piece into position of previous piece
    void follow() {
 	   
-	   if(snake.size() > 1) {
-		   
-		   snake.get(1).setTranslateX(posX);
-		   snake.get(1).setTranslateY(posY);
-		   
-		   for(int i = snake.size(); i > 1; i--) {
-			   snake.get(i-1).setTranslateX(snake.get(i-2).getTranslateX());
-			   snake.get(i-1).setTranslateY(snake.get(i-2).getTranslateY());
+
+	   System.out.println("before"+snake.get(0).getTranslateX());
+	   System.out.println("before" + snake.get(0).getTranslateY());
+	   System.out.println("beforeb "+snake.get(1).getTranslateX());
+	   System.out.println("beforeb " + snake.get(1).getTranslateY());
+		   for(int i = snake.size()-1; i > 0; i--) {
+			   if(snake.get(i-1).left) {
+				   snake.get(i).moveLeft();
+				   snake.get(i).setTranslateY(snake.get(i-1).getTranslateY());
+					snake.get(i).goLeft();
+				}
+				else if(snake.get(i-1).right) {
+					 snake.get(i).moveRight();
+					snake.get(i).goRight();
+				}
+				else if(snake.get(i-1).up) {
+					 snake.get(i).moveUp();
+					snake.get(i).goUp();
+				}
+				else if(snake.get(i-1).down) {
+					 snake.get(i).moveDown();
+					snake.get(i).goDown();
+				}
 		   }
+		      System.out.println(snake.get(0).getTranslateX());
+		   System.out.println(snake.get(0).getTranslateY());
+		   System.out.println(snake.get(1).getTranslateX());
+		   System.out.println(snake.get(1).getTranslateY());
 		   
-		   
-		   
-		   /*
-		   ListIterator<Player> li = snake.listIterator(snake.size());
-		   
-		   while(li.hasPrevious()) {
-			 
-			 Player prev =   snake.get(li.previousIndex()); // previous snake piece
-			 snake.get(li.previousIndex() +1).setTranslateX(prev.getTranslateX()); // current snake piece get previous snake x position
-			 snake.get(li.previousIndex() +1).setTranslateY(prev.getTranslateY()); // current snake piece get previous snake y position
-	
-			 li.previous();
-			 
-		   } 
-	 */  }
+	    //}
    }
    
    void growSnake() {
-	   snake.get(snake.size()-1).grow(); // grow from last index
+	   	   if(snake.size() == 0) {
+	   		  Player bod = new Player(250, 250);
+	   		  snake.add(bod);
+              root.getChildren().add(bod);
+	   	   }
+	   	   else {
+	   		   snake.get(snake.size()-1).grow(); // grow from last index
+	   	   }
    }
-   
    void snakeAteFruit() {
 	   
    }
@@ -179,14 +194,24 @@ public class GameScene extends Application {
     	
 
     	
-        snake.add(head); // this will be the part which is controlled
+     //   snake.add(head); // this will be the part which is controlled
         
         
         
     //	Canvas canvas = new Canvas(500,500);
   //  	GraphicsContext gc = canvas.getGraphicsContext2D();
+        
+       
+        
+    //	root.getChildren().addAll(snake.get(0));
     	
-    	root.getChildren().add(snake.get(0));
+    	
+        
+    	growSnake();
+        growSnake();
+   //     growSnake();
+    	
+    	
     	
         Scene scene = new Scene(root, 500, 500);
         primarystage.setTitle("Snake");
@@ -195,6 +220,8 @@ public class GameScene extends Application {
         primarystage.setScene(scene);
 
         
+        
+        // button input uses player object functions
         scene.setOnKeyPressed(e-> {
             if(e.getCode() == KeyCode.W){
                 snake.get(0).moveUp();       
@@ -211,15 +238,14 @@ public class GameScene extends Application {
             }
         });
         
-
+       
         new AnimationTimer() {
         	int counter = 0;
+        	
 			@Override
 			public void handle(long now) {
 				
-				if(counter %30 == 0) {
-					posX = snake.get(0).getTranslateX();
-					posY = snake.get(0).getTranslateY();
+				if(counter %60 == 0) {
 					
 				if(snake.get(0).left) {
 					snake.get(0).goLeft();
@@ -233,8 +259,11 @@ public class GameScene extends Application {
 				else if(snake.get(0).down) {
 					snake.get(0).goDown();
 				}
+				
 				follow();
+				
 			}
+				
 			counter++;
 			}
         	
