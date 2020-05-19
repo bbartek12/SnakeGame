@@ -17,18 +17,42 @@ import java.util.*;
 
 public class GameScene extends Application {
 
-    Player head = new Player(250, 250);
+    Player head = new Player(300, 300);
     ArrayList<Player> snake = new ArrayList<Player>(20);
     Group root = new Group();
-    boolean up = false;
-    boolean down = false;
-    boolean left = false;
-    boolean right = false;
+    Fruit fruit = new Fruit(300, 300);
 
-   public  class Player extends Rectangle{
+   public class Fruit extends Rectangle{
+	   
+	   Fruit(double x, double y){
+		   super(20, 20, Color.RED);
+		   setTranslateX(x);
+		   setTranslateY(y);
+	   }
+   }
+   
+   void createFruit() {
+	   fruit.setTranslateX(Math.random()*500);
+	   fruit.setTranslateY(Math.random()*500);
+
+	   
+	   if(fruit.getBoundsInParent().intersects(snake.get(0).getBoundsInParent()))
+		   createFruit();
+	   
+	   
+	   
+   }
+   
+   void removeFruit() {
+	   root.getChildren().remove(fruit);
+   }
+   
+ //------------------------------------------------------------------------------------------------------------  
+   
+   public class Player extends Rectangle{
         boolean isDead = false;
         boolean up = false;
-        boolean down = true;
+        boolean down = false;
         boolean left = false;
         boolean right = false;
         int length;
@@ -39,6 +63,23 @@ public class GameScene extends Application {
             length = 0;
             setTranslateX(x);
             setTranslateY(y);
+            up = false;
+            down = true;
+            left = false;
+           right = false;
+            
+        }
+        
+        Player(int x, int y, boolean l, boolean r, boolean u, boolean d){
+
+            super(20, 20); // overwrites rectangle classes
+            length = 0;
+            setTranslateX(x);
+            setTranslateY(y);
+            up = u;
+            down = d;
+            left = l;
+            right = r;
             
         }
 
@@ -107,7 +148,7 @@ public class GameScene extends Application {
         // Adds a piece depending on direction of current rectangle
         // Should only be used on last piece in snake
         void grow(){
-            Player bod = new Player(250, 250);
+            Player bod = new Player(250, 250, left, right, up, down);
             if(length < snake.size()) {
 	            if(up){      
 	                bod.setTranslateX(getTranslateX());
@@ -132,6 +173,9 @@ public class GameScene extends Application {
         }
     } 
     
+ //------------------------------------------------------------------------------------------------------------  
+
+   
     // Shifts entire snake
    // Since each piece must follow each other we scan array of pieces and shift each in reverse order
    // Move current piece into position of previous piece
@@ -152,32 +196,53 @@ public class GameScene extends Application {
 	   }
    }
    
+   void copyDirection(Player s1, Player s2) {
+	   s1.down = s2.down;
+	   s1.left = s2.left;
+	   s1.up = s2.up;
+	   s1.right = s2.right;
+   }
+   
    // Creates snake if there is none or adds a piece to end of the body
    void growSnake() {
 	   	   if(snake.size() == 0) {
-	   		  Player bod = new Player(250, 250);
+	   		  Player bod = new Player(300, 300);
 	   		  snake.add(bod);
               root.getChildren().add(bod);
 	   	   }
 	   	   else {
+	   		  
+	   		   System.out.println("before" + snake.get(snake.size()-1).left);
+	   		   System.out.println(snake.get(snake.size()-1).right);
+	   		   System.out.println(snake.get(snake.size()-1).up);
+	   		   System.out.println(snake.get(snake.size()-1).down);
+	   		   
 	   		   snake.get(snake.size()-1).grow(); // grow from last index
+	   		   
+	   		   System.out.println("after" + snake.get(snake.size()-2).left);
+	   		   System.out.println(snake.get(snake.size()-2).right);
+	   		   System.out.println(snake.get(snake.size()-2).up);
+	   		   System.out.println(snake.get(snake.size()-2).down);
+	   		   
+	   		 //  copyDirection(snake.get(snake.size()-1), snake.get(snake.size()-2));
 	   	   }
    }
    
    
    void snakeAteFruit() {
 	   
-	   if( snake.get(0).getBoundsInParent().intersects(x.getBoundsInParent())){
-		   System.out.println("yay");
-		   Platform.exit();
+	   if( snake.get(0).getBoundsInParent().intersects(fruit.getBoundsInParent())){
+	//	   removeFruit();
+		   growSnake();
+		   createFruit();
 	   }
 	   
    }
-   
-/*   void collisionDetection() {
+ /*  
+   void collisionDetection() {
 	   
 	   for(int i = 1; i < snake.size()-1; i++) {
-		   if( snake.get(0).intersects(snake.get(i).getTranslateX(), snake.get(i).getTranslateY(), 20, 20)){
+		   if( snake.get(0).getBoundsInParent()intersects(snake.get(i).getBoundsInParent())){
 			  
 			   System.out.println("yay");
 			   Platform.exit();
@@ -186,9 +251,8 @@ public class GameScene extends Application {
 		   
 	   }
    }
-   */
-   
-   Player x = new Player(300, 300);
+*/   
+
   
   void collisionDetection() {
 	   
@@ -199,19 +263,15 @@ public class GameScene extends Application {
 			 //  Platform.exit();
 			   
 		   }
-		  
-	
 	   }
-	   
-	   
-	   
-	   
-	   
    }
+  
+  //------------------------------------------------------------------------------------------------------------  
+   
     @Override
     public void start(Stage primarystage) throws Exception{
 
-        Scene scene = new Scene(root, 500, 500);
+        Scene scene = new Scene(root, 600, 600);
         primarystage.setTitle("Snake");
         primarystage.setScene(scene);
         
@@ -219,13 +279,9 @@ public class GameScene extends Application {
         growSnake();
     	growSnake();
     	growSnake();
-    	growSnake();
-    	growSnake();
-    	growSnake();
-    	growSnake();
-    	growSnake();
 
-    	 root.getChildren().add(x);
+    	createFruit();
+    	root.getChildren().add(fruit);
     	
         // button input uses player object functions
         scene.setOnKeyPressed(e-> {
@@ -279,6 +335,7 @@ public class GameScene extends Application {
 				}
 				
 				collisionDetection();
+				snakeAteFruit();
 				counter++;
 			}
         	
