@@ -39,6 +39,7 @@ public class GameScene extends Application {
             length = 0;
             setTranslateX(x);
             setTranslateY(y);
+            
         }
 
         // set snake to move left
@@ -166,8 +167,47 @@ public class GameScene extends Application {
    
    void snakeAteFruit() {
 	   
+	   if( snake.get(0).getBoundsInParent().intersects(x.getBoundsInParent())){
+		   System.out.println("yay");
+		   Platform.exit();
+	   }
+	   
    }
    
+/*   void collisionDetection() {
+	   
+	   for(int i = 1; i < snake.size()-1; i++) {
+		   if( snake.get(0).intersects(snake.get(i).getTranslateX(), snake.get(i).getTranslateY(), 20, 20)){
+			  
+			   System.out.println("yay");
+			   Platform.exit();
+		   }
+
+		   
+	   }
+   }
+   */
+   
+   Player x = new Player(300, 300);
+  
+  void collisionDetection() {
+	   
+	   for(int i = 2; i < snake.size()-1; i++) {
+		 //  if( snake.get(i).getBoundsInParent().intersects(snake.get(0).getBoundsInParent())){
+			if(Math.abs(snake.get(0).getTranslateX()  - snake.get(i).getTranslateX()) < 0.0001 && Math.abs(snake.get(0).getTranslateY() - snake.get(i).getTranslateY()) < 0.0001) {  
+			   System.out.println("yay"); //DEBUG
+			 //  Platform.exit();
+			   
+		   }
+		  
+	
+	   }
+	   
+	   
+	   
+	   
+	   
+   }
     @Override
     public void start(Stage primarystage) throws Exception{
 
@@ -179,7 +219,14 @@ public class GameScene extends Application {
         growSnake();
     	growSnake();
     	growSnake();
-        
+    	growSnake();
+    	growSnake();
+    	growSnake();
+    	growSnake();
+    	growSnake();
+
+    	 root.getChildren().add(x);
+    	
         // button input uses player object functions
         scene.setOnKeyPressed(e-> {
 
@@ -226,6 +273,12 @@ public class GameScene extends Application {
 						snake.get(0).goDown();
 					}			
 				}
+				if(snake.get(0).getTranslateX() > scene.getWidth() || snake.get(0).getTranslateX() < 0 
+						|| snake.get(0).getTranslateY() > scene.getHeight() || snake.get(0).getTranslateY() < 0 ) {
+					Platform.exit();
+				}
+				
+				collisionDetection();
 				counter++;
 			}
         	
