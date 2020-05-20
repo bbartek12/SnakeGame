@@ -15,22 +15,17 @@ import javafx.scene.layout.VBox;
 import javafx.animation.*;
 import java.util.*;
 
-// create a linked list of rectangle or player objects. Set direction of previous node to be used using current node. Also set 
-// also position previous node based on current node so if current node is going up previous node is added to back.
-
-// walk arraylist and move head up by size of block and put previous node to current node's position
-
 public class GameScene extends Application {
 
-  //  Player head = new Player(300, 300);
-    ArrayList<Player> snake = new ArrayList<Player>(20);
+    ArrayList<Player> snake = new ArrayList<Player>(20); // store the body of the snake
     Group root = new Group();
     Fruit fruit = new Fruit(300, 300);
     Scene scene = new Scene(root, 600, 600);
     Button btn = new Button("Start");
     Button reset = new Button("Restart");
 
-    
+   // creates a rectangle object that randomly moves around the game 
+   // this is the red rectangle the snake eats
    public class Fruit extends Rectangle{
 	   
 	   Fruit(double x, double y){
@@ -40,6 +35,7 @@ public class GameScene extends Application {
 	   }
    }
    
+   // creating a new fruit object is pointless so I simply move it when it is eaten
    void createFruit() {
 	   fruit.setTranslateX(Math.random()*500);
 	   fruit.setTranslateY(Math.random()*500);
@@ -50,6 +46,7 @@ public class GameScene extends Application {
 
    }
    
+   // unused -- remove?
    void removeFruit() {
 	   root.getChildren().remove(fruit);
    }
@@ -57,26 +54,38 @@ public class GameScene extends Application {
  //------------------------------------------------------------------------------------------------------------  
    
    public class Player extends Rectangle{
+	
+	// death flag
         boolean isDead = false;
+	
+	// movement directions
         boolean up = false;
         boolean down = false;
         boolean left = false;
         boolean right = false;
+	
+	// length of snake
         int length;
        
+	// Constructor
         Player(int x, int y){
 
-            super(20, 20); // overwrites rectangle classes
-            length = 0;
-            setTranslateX(x);
+            super(20, 20); // overwrites rectangle classes to size 20 by 20 square
+            length = 0; // length of snake
+            
+            // set body position
+	    setTranslateX(x);
             setTranslateY(y);
-            up = false;
+           
+	    // set original movement directions to none
+	    up = false;
             down = false;
             left = false;
-           right = false;
+            right = false;
             
         }
         
+	// Copy constructor? which allows to set directions
         Player(int x, int y, boolean l, boolean r, boolean u, boolean d){
 
             super(20, 20); // overwrites rectangle classes
@@ -146,10 +155,10 @@ public class GameScene extends Application {
         }
         void goUp() {
         	if(!down){
-            	setTranslateY(getTranslateY() - 20);
+            		setTranslateY(getTranslateY() - 20);
         	}
         }
-        
+        //--------------------------------------------------------------
   
         
         // Adds a piece depending on direction of current rectangle
@@ -158,29 +167,33 @@ public class GameScene extends Application {
             Player bod = new Player(1000, 1000); // spawns box out of range before adding it to the snake
             if(length < snake.size()) {
 	            
-            	// these if statements do not seem to work since it would always spawn with down being true for each rectangle
-            	if(up){
+		    // these if statements do not seem to work since it would always spawn with down being true for each rectangle
+		    if(up){ // if last piece is going up add a piece behind it
 	            	bod.moveUp();
 	                bod.setTranslateX(getTranslateX());
 	                bod.setTranslateY(getTranslateY() + 20);
 	            }
+		    // if last piece is going down add a piece above it
 	            else if(down){   
 	            	bod.moveDown();
 	                bod.setTranslateX(getTranslateX());
 	                bod.setTranslateY(getTranslateY() - 20);
 	            }
+		    // if last piece is going left add a piece to right of it
 	            else if(left){   
 	            	bod.moveLeft();
 	                bod.setTranslateX(getTranslateX() + 20);
 	                bod.setTranslateY(getTranslateY());
 	            }
+		    // if last piece is going right a piece to the left of it
 	            else if(right){    
 	            	bod.moveRight();
 	                bod.setTranslateX(getTranslateX() - 20);
 	                bod.setTranslateY(getTranslateY());
 	            }
+		    
 	            length++;
-	            snake.add(bod);
+	            snake.add(bod); // add to list of snake pieces
 	            root.getChildren().add(bod); // add to group to make it visible
             }
         }
@@ -193,10 +206,11 @@ public class GameScene extends Application {
    // Since each piece must follow each other we scan array of pieces and shift each in reverse order
    // Move current piece into position of previous piece
    void follow(double posX, double posY) {
-   
+	   // protect against out of bounds error when sneak head is destroyed
+	   // unnecessary since head is created before animation loop
 	   if(snake.size() > 1) {
+		   // Going from the end of the snake shift each piece to the position of the piece ahead of it
 		   for(int i = snake.size()-1; i > 0; i--) {
-			   
 			   if(i == 1) { // prevents from first piece being overlapped
 				   snake.get(1).setTranslateX(posX);
 				   snake.get(1).setTranslateY(posY);
@@ -209,23 +223,17 @@ public class GameScene extends Application {
 	   }
    }
    
-   
-   void copyDirection(Player s1, Player s2) {
-	   s1.down = s2.down;
-	   s1.left = s2.left;
-	   s1.up = s2.up;
-	   s1.right = s2.right;
-   }
+
    
    // Creates snake if there is none or adds a piece to end of the body
    void growSnake() {
 	   	   if(snake.size() == 0) {
 	   		  Player bod = new Player(280, 280);
 	   		  snake.add(bod);
-              root.getChildren().add(bod);
+           		  root.getChildren().add(bod);
 	   	   }
 	   	   else {
-	   		  
+	   		  // debug
 	   		   System.out.println("before" + snake.get(snake.size()-1).left);
 	   		   System.out.println(snake.get(snake.size()-1).right);
 	   		   System.out.println(snake.get(snake.size()-1).up);
@@ -242,29 +250,31 @@ public class GameScene extends Application {
 	   	   }
    }
    
-   
-   void snakeAteFruit() {
-	   
+   // This checks if bounds of the snake head touched the fruit
+   // this may be too "sensitive" since even touching the border will count
+   // should be changed to collision detection like check after fruit pieces spawn on perfect grid
+   void snakeAteFruit() {	   
 	   if( snake.get(0).getBoundsInParent().intersects(fruit.getBoundsInParent())){
-	//	   removeFruit();
 		   growSnake();
 		   createFruit();
 	   }	   
    }
    
-
+  // Checks if the head touched any other piece of the snake
+  // doesn't check 2nd piece since it is impossible to eat body without 4 body pieces (so can be changed further)
   void collisionDetection() {
 	   
-	   for(int i = 2; i < snake.size()-1; i++) {
-		 //  if( snake.get(i).getBoundsInParent().intersects(snake.get(0).getBoundsInParent())){
+	   	for(int i = 2; i < snake.size()-1; i++) {
 			if(Math.abs(snake.get(0).getTranslateX()  - snake.get(i).getTranslateX()) < 0.0001 && Math.abs(snake.get(0).getTranslateY() - snake.get(i).getTranslateY()) < 0.0001) {  
 			   System.out.println("yay"); //DEBUG
 			  // Platform.exit();
 			   snake.get(0).isDead = true; // game over
-		   }
+		}
 	   }
    }
   
+  // Checks if player is out of bounds
+  // or if the snake eat is body-- this is checked in collisionDetection()
   boolean isPlayerDead() {
 	  
 	  // When the snake head goes outside the bounds
@@ -287,17 +297,19 @@ public class GameScene extends Application {
 
         
         primarystage.setTitle("Snake");
-        primarystage.setScene(startGameScene());
+        primarystage.setScene(startGameScene()); // set to menu screen
         
+	// Button to start game
         btn.setOnAction(e->
     	{
             primarystage.setScene(scene);
             primarystage.show();
     	});
         
+	// resets game after a death
         reset.setOnAction(e->
         {
-        	 primarystage.setScene(scene);
+             primarystage.setScene(scene);
              primarystage.show();
         });
         
@@ -305,7 +317,8 @@ public class GameScene extends Application {
         growSnake();
     	growSnake();
     	growSnake();
-
+	
+	// move fruit to a random place and diplay it
     	createFruit();
     	root.getChildren().add(fruit);
     	
@@ -362,26 +375,22 @@ public class GameScene extends Application {
 							snake.get(0).goDown();
 						}			
 
-
-
 						collisionDetection();
 						snakeAteFruit();
 						if(isPlayerDead()) { 
 							primarystage.setScene(gameOverScene());
 							primarystage.show();
 						}
-				}
+					}
 				}
 				counter++;
-				
 			}
-        	
         }.start();
-        
-        
+              
         primarystage.show();
     }
 
+    // Create a menu which starts the game
     Scene startGameScene() {
     	
     	btn.setStyle("-fx-background-color: red; -fx-font-weight: bold; -fx-font-size: 30");
@@ -395,7 +404,9 @@ public class GameScene extends Application {
     	vbox.setAlignment(Pos.CENTER);
     	return new Scene(vbox,500,500);
     }
-    
+   
+  // Create a reset game button which shows up after death
+  // this also resets values to original
   Scene gameOverScene() {
     	
 	// make button appealing
