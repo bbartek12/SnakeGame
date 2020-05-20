@@ -1,12 +1,17 @@
 import javafx.application.*;
+import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.scene.*;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.text.Text;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.animation.*;
 import java.util.*;
 
@@ -17,11 +22,15 @@ import java.util.*;
 
 public class GameScene extends Application {
 
-    Player head = new Player(300, 300);
+  //  Player head = new Player(300, 300);
     ArrayList<Player> snake = new ArrayList<Player>(20);
     Group root = new Group();
     Fruit fruit = new Fruit(300, 300);
+    Scene scene = new Scene(root, 600, 600);
+    Button btn = new Button("Start");
+    Button reset = new Button("Restart");
 
+    
    public class Fruit extends Rectangle{
 	   
 	   Fruit(double x, double y){
@@ -38,9 +47,7 @@ public class GameScene extends Application {
 	   
 	   if(fruit.getBoundsInParent().intersects(snake.get(0).getBoundsInParent()))
 		   createFruit();
-	   
-	   
-	   
+
    }
    
    void removeFruit() {
@@ -64,7 +71,7 @@ public class GameScene extends Application {
             setTranslateX(x);
             setTranslateY(y);
             up = false;
-            down = true;
+            down = false;
             left = false;
            right = false;
             
@@ -76,10 +83,10 @@ public class GameScene extends Application {
             length = 0;
             setTranslateX(x);
             setTranslateY(y);
-            up = u;
-            down = d;
-            left = l;
-            right = r;
+            this.up = u;
+            this.down = d;
+            this.left = l;
+            this.right = r;
             
         }
 
@@ -148,21 +155,27 @@ public class GameScene extends Application {
         // Adds a piece depending on direction of current rectangle
         // Should only be used on last piece in snake
         void grow(){
-            Player bod = new Player(250, 250, left, right, up, down);
+            Player bod = new Player(1000, 1000); // spawns box out of range before adding it to the snake
             if(length < snake.size()) {
-	            if(up){      
+	            
+            	// these if statements do not seem to work since it would always spawn with down being true for each rectangle
+            	if(up){
+	            	bod.moveUp();
 	                bod.setTranslateX(getTranslateX());
 	                bod.setTranslateY(getTranslateY() + 20);
 	            }
-	            else if(down){      
+	            else if(down){   
+	            	bod.moveDown();
 	                bod.setTranslateX(getTranslateX());
 	                bod.setTranslateY(getTranslateY() - 20);
 	            }
-	            else if(left){      
+	            else if(left){   
+	            	bod.moveLeft();
 	                bod.setTranslateX(getTranslateX() + 20);
 	                bod.setTranslateY(getTranslateY());
 	            }
-	            else if(right){      
+	            else if(right){    
+	            	bod.moveRight();
 	                bod.setTranslateX(getTranslateX() - 20);
 	                bod.setTranslateY(getTranslateY());
 	            }
@@ -196,6 +209,7 @@ public class GameScene extends Application {
 	   }
    }
    
+   
    void copyDirection(Player s1, Player s2) {
 	   s1.down = s2.down;
 	   s1.left = s2.left;
@@ -206,7 +220,7 @@ public class GameScene extends Application {
    // Creates snake if there is none or adds a piece to end of the body
    void growSnake() {
 	   	   if(snake.size() == 0) {
-	   		  Player bod = new Player(300, 300);
+	   		  Player bod = new Player(280, 280);
 	   		  snake.add(bod);
               root.getChildren().add(bod);
 	   	   }
@@ -235,45 +249,57 @@ public class GameScene extends Application {
 	//	   removeFruit();
 		   growSnake();
 		   createFruit();
-	   }
-	   
+	   }	   
    }
- /*  
-   void collisionDetection() {
-	   
-	   for(int i = 1; i < snake.size()-1; i++) {
-		   if( snake.get(0).getBoundsInParent()intersects(snake.get(i).getBoundsInParent())){
-			  
-			   System.out.println("yay");
-			   Platform.exit();
-		   }
+   
 
-		   
-	   }
-   }
-*/   
-
-  
   void collisionDetection() {
 	   
 	   for(int i = 2; i < snake.size()-1; i++) {
 		 //  if( snake.get(i).getBoundsInParent().intersects(snake.get(0).getBoundsInParent())){
 			if(Math.abs(snake.get(0).getTranslateX()  - snake.get(i).getTranslateX()) < 0.0001 && Math.abs(snake.get(0).getTranslateY() - snake.get(i).getTranslateY()) < 0.0001) {  
 			   System.out.println("yay"); //DEBUG
-			 //  Platform.exit();
-			   
+			  // Platform.exit();
+			   snake.get(0).isDead = true; // game over
 		   }
 	   }
    }
+  
+  boolean isPlayerDead() {
+	  
+	  // When the snake head goes outside the bounds
+	  if(snake.get(0).getTranslateX() > scene.getWidth() || snake.get(0).getTranslateX() < 0 
+				|| snake.get(0).getTranslateY() > scene.getHeight() || snake.get(0).getTranslateY() < 0 ) {
+		  return true;
+	  }
+	  
+	  if(snake.get(0).isDead) { // flag is raised in collisionDetection to mark snake as dead
+		  return true;
+	  }
+	  
+	  return false;
+  }
   
   //------------------------------------------------------------------------------------------------------------  
    
     @Override
     public void start(Stage primarystage) throws Exception{
 
-        Scene scene = new Scene(root, 600, 600);
+        
         primarystage.setTitle("Snake");
-        primarystage.setScene(scene);
+        primarystage.setScene(startGameScene());
+        
+        btn.setOnAction(e->
+    	{
+            primarystage.setScene(scene);
+            primarystage.show();
+    	});
+        
+        reset.setOnAction(e->
+        {
+        	 primarystage.setScene(scene);
+             primarystage.show();
+        });
         
         // Start snake with length of 3
         growSnake();
@@ -284,6 +310,8 @@ public class GameScene extends Application {
     	root.getChildren().add(fruit);
     	
         // button input uses player object functions
+	// sets the values to true or false to avoid spamming of buttons
+	// if the snake moved with each button press the game would be broken since the body would shift 1 block
         scene.setOnKeyPressed(e-> {
 
             if(e.getCode() == KeyCode.W){
@@ -303,40 +331,49 @@ public class GameScene extends Application {
         
 
         // Animates constant movement
+	// Check for collision and out of bounds death
+	// also move fruit when it is eaten
         new AnimationTimer() {
         	int counter = 0;
 
 			@Override
 			public void handle(long now) {
 				
-				if(counter %30 == 0) { // slow down fps of the game
-						
-					double posX = snake.get(0).getTranslateX();
-					double posY = snake.get(0).getTranslateY();
-
-					follow(posX,posY);
+				if(counter %20 == 0) { // slow down fps of the game
 					
-					if(snake.get(0).left) {
-						snake.get(0).goLeft();
-					}
-					else if(snake.get(0).right) {
-						snake.get(0).goRight();
-					}
-					else if(snake.get(0).up) {
-						snake.get(0).goUp();
-					}
-					else if(snake.get(0).down) {
-						snake.get(0).goDown();
-					}			
+					// set so when game is over none of the functions are accessed
+					// a better idea may be to stop the animation timer and reset it.
+					if(snake.size() > 0) { 
+						double posX = snake.get(0).getTranslateX();
+						double posY = snake.get(0).getTranslateY();
+
+						follow(posX,posY);
+
+						if(snake.get(0).left) {
+							snake.get(0).goLeft();
+						}
+						else if(snake.get(0).right) {
+							snake.get(0).goRight();
+						}
+						else if(snake.get(0).up) {
+							snake.get(0).goUp();
+						}
+						else if(snake.get(0).down) {
+							snake.get(0).goDown();
+						}			
+
+
+
+						collisionDetection();
+						snakeAteFruit();
+						if(isPlayerDead()) { 
+							primarystage.setScene(gameOverScene());
+							primarystage.show();
+						}
 				}
-				if(snake.get(0).getTranslateX() > scene.getWidth() || snake.get(0).getTranslateX() < 0 
-						|| snake.get(0).getTranslateY() > scene.getHeight() || snake.get(0).getTranslateY() < 0 ) {
-					Platform.exit();
 				}
-				
-				collisionDetection();
-				snakeAteFruit();
 				counter++;
+				
 			}
         	
         }.start();
@@ -345,6 +382,49 @@ public class GameScene extends Application {
         primarystage.show();
     }
 
+    Scene startGameScene() {
+    	
+    	btn.setStyle("-fx-background-color: red; -fx-font-weight: bold; -fx-font-size: 30");
+    	btn.setPrefSize(200, 100);
+    	
+    	Text title = new Text("Snake");
+    	
+    	title.setStyle("-fx-font-weight: bold; -fx-font-size: 50");
+
+    	VBox vbox = new VBox(title, btn);
+    	vbox.setAlignment(Pos.CENTER);
+    	return new Scene(vbox,500,500);
+    }
+    
+  Scene gameOverScene() {
+    	
+	// make button appealing
+    	reset.setStyle("-fx-background-color: red; -fx-font-weight: bold; -fx-font-size: 30");
+    	reset.setPrefSize(200, 100);
+    	
+    	Text gameOver = new Text("Game Over");
+    	gameOver.setStyle("-fx-font-weight: bold; -fx-font-size: 50");
+	
+	// used to center button
+    	VBox vbox = new VBox(gameOver, reset);
+    	vbox.setAlignment(Pos.CENTER);
+    	
+    	// clear snake
+    	root.getChildren().clear();
+    	snake.clear();
+    	
+	// add fruit back to root and move it
+    	root.getChildren().add(fruit);
+    	fruit.setTranslateX(Math.random()*500);
+    	fruit.setTranslateY(Math.random()*500);
+    	
+	// reset snake to original size
+    	growSnake();
+    	growSnake();
+    	growSnake();
+    	
+    	return new Scene(vbox,500,500);
+    }
 
     // launch application
     public static void main(String[] args){
