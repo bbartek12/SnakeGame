@@ -19,7 +19,8 @@ public class Main extends Application {
     Group root = new Group();
     Fruit fruit = new Fruit(300, 300);
     Scene scene = new Scene(root, 600, 600);
-    Button btn = new Button("Start");
+    StartScene startScene = new StartScene();
+    Button btn = startScene.startBtn;
     Button reset = new Button("Restart");
 
 
@@ -46,6 +47,22 @@ public class Main extends Application {
         }
     }
 
+    void playerDirection(Snake head){
+        // after picking direction with button input go in that direction
+        if(head.left) {
+            head.goLeft();
+        }
+        else if(head.right) {
+            head.goRight();
+        }
+        else if(head.up) {
+            head.goUp();
+        }
+        else if(head.down) {
+            head.goDown();
+        }
+    }
+
     // copy over the direction of object snake s2 to s1
     void copyDirection(Snake s1, Snake s2) {
         s1.down = s2.down;
@@ -54,6 +71,33 @@ public class Main extends Application {
         s1.right = s2.right;
     }
 
+    void setGrowthPosition(Snake s1, Snake s2){
+
+        // these if statements do not seem to work since it would always spawn with down being true for each rectangle
+        if (s1.up) { // if last piece is going up add a piece behind it
+            s2.moveUp();
+            s2.setTranslateX(s1.getTranslateX());
+            s2.setTranslateY(s1.getTranslateY() + 20);
+        }
+        // if last piece is going down add a piece above it
+        else if (s1.down) {
+            s2.moveDown();
+            s2.setTranslateX(s1.getTranslateX());
+            s2.setTranslateY(s1.getTranslateY() - 20);
+        }
+        // if last piece is going left add a piece to right of it
+        else if (s1.left) {
+            s2.moveLeft();
+            s2.setTranslateX(s1.getTranslateX() + 20);
+            s2.setTranslateY(s1.getTranslateY());
+        }
+        // if last piece is going right a piece to the left of it
+        else if (s1.right) {
+            s2.moveRight();
+            s2.setTranslateX(s1.getTranslateX() - 20);
+            s2.setTranslateY(s1.getTranslateY());
+        }
+    }
 
     // Creates snake if there is none or adds a piece to end of the body
     void growSnake() {
@@ -66,40 +110,10 @@ public class Main extends Application {
         }
         else {
             Snake bod =  new Snake(280, 280);
-            System.out.println("in grow snake else statement");
 
-            // these if statements do not seem to work since it would always spawn with down being true for each rectangle
-            if (snake.get(snake.size()-1).up) { // if last piece is going up add a piece behind it
-                bod.moveUp();
-                bod.setTranslateX(snake.get(snake.size()-1).getTranslateX());
-                bod.setTranslateY(snake.get(snake.size()-1).getTranslateY() + 20);
-            }
-            // if last piece is going down add a piece above it
-            else if (snake.get(snake.size()-1).down) {
-                bod.moveDown();
-                bod.setTranslateX(snake.get(snake.size()-1).getTranslateX());
-                bod.setTranslateY(snake.get(snake.size()-1).getTranslateY() - 20);
-            }
-            // if last piece is going left add a piece to right of it
-            else if (snake.get(snake.size()-1).left) {
-                bod.moveLeft();
-                bod.setTranslateX(snake.get(snake.size()-1).getTranslateX() + 20);
-                bod.setTranslateY(snake.get(snake.size()-1).getTranslateY());
-            }
-            // if last piece is going right a piece to the left of it
-            else if (snake.get(snake.size()-1).right) {
-                bod.moveRight();
-                bod.setTranslateX(snake.get(snake.size()-1).getTranslateX() - 20);
-                bod.setTranslateY(snake.get(snake.size()-1).getTranslateY());
-            }
-
+            setGrowthPosition(snake.get(snake.size()-1), bod);
             snake.add(bod);
             root.getChildren().add(bod);
-
-            ; // grow from last index
-
-
-            //  copyDirection(snake.get(snake.size()-1), snake.get(snake.size()-2));
         }
     }
 
@@ -148,7 +162,7 @@ public class Main extends Application {
             return true;
         }
 
-        if(snake.get(0).isDead) { // flag is raised in collisionDetection to mark snake as dead
+        if(snake.get(0).isDead) { // flag is raised in collisionDetection to mark snake eat its own body
             return true;
         }
 
@@ -161,7 +175,7 @@ public class Main extends Application {
 
 
         primarystage.setTitle("Snake");
-        primarystage.setScene(startGameScene()); // set to menu screen
+        primarystage.setScene(startScene.createScene()); // set to menu screen
 
         // Button to start game
         btn.setOnAction(e->
@@ -228,18 +242,7 @@ public class Main extends Application {
                         follow(posX,posY);
 
                         // after picking direction with button input go in that direction
-                        if(snake.get(0).left) {
-                            snake.get(0).goLeft();
-                        }
-                        else if(snake.get(0).right) {
-                            snake.get(0).goRight();
-                        }
-                        else if(snake.get(0).up) {
-                            snake.get(0).goUp();
-                        }
-                        else if(snake.get(0).down) {
-                            snake.get(0).goDown();
-                        }
+                       playerDirection(snake.get(0));
 
                         collisionDetection();
                         snakeAteFruit();
@@ -256,20 +259,6 @@ public class Main extends Application {
         primarystage.show();
     }
 
-    // Create a menu which starts the game
-    Scene startGameScene() {
-
-        btn.setStyle("-fx-background-color: red; -fx-font-weight: bold; -fx-font-size: 30");
-        btn.setPrefSize(200, 100);
-
-        Text title = new Text("Snake");
-
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 50");
-
-        VBox vbox = new VBox(title, btn);
-        vbox.setAlignment(Pos.CENTER);
-        return new Scene(vbox,500,500);
-    }
 
     // Create a reset game button which shows up after death
     // this also resets values to original
