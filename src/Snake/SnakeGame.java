@@ -6,9 +6,11 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -17,20 +19,24 @@ import java.util.Map;
 
 public class SnakeGame extends Application {
 
+	// Create objects necessary for game
 	ArrayList<Snake> snake = new ArrayList<Snake>(20); // store the body of the snake
 	Group root = new Group();
 	Fruit fruit = new Fruit(300, 300);
-	Scene scene = new Scene(root, 600, 600);
+	int score = 0;
+	int setSpeed = 10; // The higher this number is the slower the snake
 
-	// Retrieve the two scenes
+	// Retrieve the two scenes, create a new one, and something to store the scenes
 	StartScene startScene = new StartScene();
 	GameOverScene gameOverScene = new GameOverScene();
+	Scene scene = new Scene(root, 600, 600);
+	Map<String, Scene> sceneMap = new HashMap<>();
 
 	// Get the buttons from the scenes
 	Button btn = startScene.startBtn;
 	Button reset = gameOverScene.reset;
 
-	Map<String, Scene> sceneMap = new HashMap<>();
+	Label scoreText = new Label("Score: " + Integer.toString(score));
 
 
 	// Shifts entire snake
@@ -111,19 +117,13 @@ public class SnakeGame extends Application {
 
 	// Creates snake if there is none or adds a piece to end of the body
 	void growSnake() {
-		if(snake.size() == 0) {
-			Snake bod = new Snake(280, 280);
 
-			snake.add(bod);
-			root.getChildren().add(bod);
-		}
-		else {
-			Snake bod =  new Snake(280, 280);
-
+		Snake bod = new Snake(280, 280);
+		if(snake.size() != 0) {
 			setGrowthPosition(snake.get(snake.size()-1), bod);
-			snake.add(bod);
-			root.getChildren().add(bod);
 		}
+		snake.add(bod);
+		root.getChildren().add(bod);
 	}
 
 	// creating a new fruit object is pointless so I simply move it when it is eaten
@@ -131,18 +131,28 @@ public class SnakeGame extends Application {
 		fruit.setTranslateX(Math.random()*500);
 		fruit.setTranslateY(Math.random()*500);
 
+		// Safety against illegal access
+		if(snake.isEmpty()){
+			return;
+		}
+
 		// If fruit is create on top of snake head move it
 		if(fruit.getBoundsInParent().intersects(snake.get(0).getBoundsInParent()))
 			createFruit();
 
 	}
 
+	void updateScore(){
+		score += fruit.getPoints();
+		scoreText.setText("Score: " + Integer.toString(score));
+	}
 
 	// This checks if bounds of the snake head touched the fruit
 	// this may be too "sensitive" since even touching the border will count
 	// should be changed to collision detection like check after fruit pieces spawn on perfect grid
 	void snakeAteFruit() {
 		if( snake.get(0).getBoundsInParent().intersects(fruit.getBoundsInParent())){
+			updateScore();
 			growSnake();
 			createFruit();
 		}
@@ -182,8 +192,13 @@ public class SnakeGame extends Application {
 	@Override
 	public void start(Stage primarystage) {
 
+		// Store scenes in hashmap to allow for swapping
 		sceneMap.put(startScene.KEY, startScene.createScene());
 		sceneMap.put(gameOverScene.KEY, gameOverScene.createScene());
+
+		score = 0; // set score to 0 at start of game
+
+		scoreText.setStyle("-fx-font-size:30;");
 
 		primarystage.setTitle("Snake");
 		primarystage.setScene(sceneMap.get(StartScene.KEY)); // set to menu screen
@@ -202,14 +217,8 @@ public class SnakeGame extends Application {
 			primarystage.show();
 		});
 
-		// Start snake with length of 3
-		growSnake();
-		growSnake();
-		growSnake();
-
-		// move fruit to a random place and diplay it
-		createFruit();
-		root.getChildren().add(fruit);
+		// Set default values for snake and position of fruit
+		resetValues();
 
 		// button input uses player object functions
 		// sets the values to true or false to avoid spamming of buttons
@@ -241,7 +250,7 @@ public class SnakeGame extends Application {
 			@Override
 			public void handle(long now) {
 
-				if(counter %10 == 0) { // slow down fps of the game
+				if(counter % setSpeed == 0) { // slow down fps of the game
 
 					// set so when game is over none of the functions are accessed
 					// a better idea may be to stop the animation timer and reset it.
@@ -278,12 +287,14 @@ public class SnakeGame extends Application {
 		root.getChildren().clear();
 		snake.clear();
 
+		root.getChildren().add(scoreText);
+
+		scoreText.relocate(200, 0);
 		// add fruit back to root and move it
 		root.getChildren().add(fruit);
-		fruit.setTranslateX(Math.random()*500);
-		fruit.setTranslateY(Math.random()*500);
+		createFruit();
 
-		// reset snake to original size
+		// Starts snake to original size
 		growSnake();
 		growSnake();
 		growSnake();
@@ -293,7 +304,7 @@ public class SnakeGame extends Application {
 	// this also resets values to original
 	Scene gameOverScene() {
 		resetValues();
-		return sceneMap.get("gameOver");
+		return sceneMap.get(gameOverScene.KEY);
 	}
 
 	// launch application
