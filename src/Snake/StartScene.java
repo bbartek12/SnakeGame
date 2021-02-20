@@ -13,6 +13,8 @@ public class StartScene {
     Text title = new Text("Snake");
     VBox vbox = new VBox(title, startBtn);
 
+    public static final String KEY = "startGame"; // Key to retrieve scene
+
     // Create a menu which starts the game
     StartScene(){
 

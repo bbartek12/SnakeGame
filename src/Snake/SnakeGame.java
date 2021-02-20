@@ -12,6 +12,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SnakeGame extends Application {
 
@@ -19,9 +21,16 @@ public class SnakeGame extends Application {
 	Group root = new Group();
 	Fruit fruit = new Fruit(300, 300);
 	Scene scene = new Scene(root, 600, 600);
+
+	// Retrieve the two scenes
 	StartScene startScene = new StartScene();
+	GameOverScene gameOverScene = new GameOverScene();
+
+	// Get the buttons from the scenes
 	Button btn = startScene.startBtn;
-	Button reset = new Button("Restart");
+	Button reset = gameOverScene.reset;
+
+	Map<String, Scene> sceneMap = new HashMap<>();
 
 
 	// Shifts entire snake
@@ -46,7 +55,8 @@ public class SnakeGame extends Application {
 			}
 		}
 	}
-//ind x;
+
+
 	void playerDirection(Snake head){
 		// after picking direction with button input go in that direction
 		if(head.left) {
@@ -103,7 +113,6 @@ public class SnakeGame extends Application {
 	void growSnake() {
 		if(snake.size() == 0) {
 			Snake bod = new Snake(280, 280);
-			System.out.println("in grow snake if statement");
 
 			snake.add(bod);
 			root.getChildren().add(bod);
@@ -171,11 +180,13 @@ public class SnakeGame extends Application {
 	//------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public void start(Stage primarystage) throws Exception{
+	public void start(Stage primarystage) {
 
+		sceneMap.put(startScene.KEY, startScene.createScene());
+		sceneMap.put(gameOverScene.KEY, gameOverScene.createScene());
 
 		primarystage.setTitle("Snake");
-		primarystage.setScene(startScene.createScene()); // set to menu screen
+		primarystage.setScene(sceneMap.get(StartScene.KEY)); // set to menu screen
 
 		// Button to start game
 		btn.setOnAction(e->
@@ -230,7 +241,7 @@ public class SnakeGame extends Application {
 			@Override
 			public void handle(long now) {
 
-				if(counter %20 == 0) { // slow down fps of the game
+				if(counter %10 == 0) { // slow down fps of the game
 
 					// set so when game is over none of the functions are accessed
 					// a better idea may be to stop the animation timer and reset it.
@@ -260,20 +271,8 @@ public class SnakeGame extends Application {
 	}
 
 
-	// Create a reset game button which shows up after death
-	// this also resets values to original
-	Scene gameOverScene() {
-
-		// make button appealing
-		reset.setStyle("-fx-background-color: red; -fx-font-weight: bold; -fx-font-size: 30");
-		reset.setPrefSize(200, 100);
-
-		Text gameOver = new Text("Game Over");
-		gameOver.setStyle("-fx-font-weight: bold; -fx-font-size: 50");
-
-		// used to center button
-		VBox vbox = new VBox(gameOver, reset);
-		vbox.setAlignment(Pos.CENTER);
+	// Resets game values to default
+	public void resetValues(){
 
 		// clear snake
 		root.getChildren().clear();
@@ -288,8 +287,13 @@ public class SnakeGame extends Application {
 		growSnake();
 		growSnake();
 		growSnake();
+	}
 
-		return new Scene(vbox,500,500);
+	// Create a reset game button which shows up after death
+	// this also resets values to original
+	Scene gameOverScene() {
+		resetValues();
+		return sceneMap.get("gameOver");
 	}
 
 	// launch application
