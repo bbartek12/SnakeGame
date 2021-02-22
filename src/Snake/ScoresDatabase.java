@@ -30,6 +30,13 @@ public class ScoresDatabase {
         return connection;
     }
 
+    // Runs test to see if there is a connection
+    // When function enters catch boolean is set to false
+    public static boolean isConnectedToServer(){
+        connect();
+        return isConnected;
+    }
+
     // Get all scores sorted
     public static List<Pair<String, Integer>> getSortedScores() throws SQLException {
         Connection connection = connect();
@@ -46,7 +53,7 @@ public class ScoresDatabase {
 
         // Insert into Hashmap
         while(resultSet.next()){
-            playerScoreList.add(new Pair<String, Integer>(resultSet.getString("UserName"), resultSet.getInt("Score")));
+            playerScoreList.add(new Pair<>(resultSet.getString("UserName"), resultSet.getInt("Score")));
         }
 
         // Close statement and connection once operation is finished

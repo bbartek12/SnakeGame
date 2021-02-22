@@ -257,7 +257,10 @@ public class SnakeGame extends Application {
 		root.getChildren().add(gameLogic.fruit);
 		gameLogic.createFruit();
 
-		enterBtn.setDisable(false);
+		// Prevent from re-enabling if servers are down
+		if(ScoresDatabase.isConnected) {
+			enterBtn.setDisable(false);
+		}
 
 		// Starts snake to original size
 		gameLogic.growSnake(root);
