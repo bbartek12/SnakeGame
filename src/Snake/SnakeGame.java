@@ -61,19 +61,20 @@ public class SnakeGame extends Application {
 
 	//---------------------------------------------------------------------
 
-	Label scoreText = new Label("Score: " + Integer.toString(gameLogic.score));
+	Label scoreText = new Label("Score: " + gameLogic.score);
 	Label scoreGameOver = gameOverScene.playerScore;
 	TextField scoreInput = gameOverScene.userScoreInput;
 
 	// Update the current score when snake ate the fruit
 	void snakeAteUpdate(){
 		if(gameLogic.snakeAteFruit(root)) {
-			scoreText.setText("Score: " + Integer.toString(gameLogic.score));
+			scoreText.setText("Score: " + gameLogic.score);
 		}
 	}
 
 	// Sets scene to main game scene
 	void startGame(Stage primaryStage){
+	    restartGame();
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
@@ -82,9 +83,9 @@ public class SnakeGame extends Application {
 	public void start(Stage primaryStage) throws SQLException {
 
 		// Store scenes in hashmap to allow for swapping
-		sceneMap.put(startScene.KEY, startScene.createScene());
-		sceneMap.put(gameOverScene.KEY, gameOverScene.createScene());
-		sceneMap.put(scoreScene.KEY, scoreScene.createScoresScene());
+		sceneMap.put(StartScene.KEY, startScene.createScene());
+		sceneMap.put(GameOverScene.KEY, gameOverScene.createScene());
+		sceneMap.put(ScoreScene.KEY, scoreScene.createScoresScene());
 
 		gameLogic.score = 0; // set score to 0 at start of game
 
@@ -95,7 +96,7 @@ public class SnakeGame extends Application {
 		primaryStage.setScene(sceneMap.get(StartScene.KEY)); // set to menu screen
 
 		// If server is disconnected then block database related functionalities
-        if(!database.isConnected){
+        if(!ScoresDatabase.isConnected){
         	scoreBoard.setDisable(true);
         	scoreBoardBtn2.setDisable(true);
         	scoreInput.setDisable(true);
@@ -142,6 +143,7 @@ public class SnakeGame extends Application {
 		// resets game after a death
 		reset.setOnAction(e->
 		{
+		    restartGame();
 			startGame(primaryStage);
 		});
 
@@ -161,8 +163,7 @@ public class SnakeGame extends Application {
 
 		home.setOnAction(e->
 		{
-			resetGame();
-			primaryStage.setScene(sceneMap.get(startScene.KEY));
+			primaryStage.setScene(sceneMap.get(StartScene.KEY));
 			primaryStage.show();
 		});
 
@@ -171,7 +172,7 @@ public class SnakeGame extends Application {
 
 			try {
 			    // Insert players score
-				database.insert(scoreInput.getText(), gameLogic.score);
+				ScoresDatabase.insert(scoreInput.getText(), gameLogic.score);
 				sceneMap.put(ScoreScene.KEY, scoreScene.createScoresScene());
 			}
 			catch (SQLException throwables) {
@@ -253,7 +254,6 @@ public class SnakeGame extends Application {
 		root.getChildren().clear();
 		gameLogic.snake.clear();
 
-		gameLogic.score = 0;
 		scoreText.setText("Score: " + gameLogic.score);
 		root.getChildren().add(scoreText);
 
@@ -269,11 +269,19 @@ public class SnakeGame extends Application {
 		gameLogic.growSnake(root);
 	}
 
+	// Wrapper class
+	// Also resets score since score should not be reset until after saved in database
+	public void restartGame(){
+		gameLogic.resetScore();
+		resetGame();
+	}
+
+
 	// Create a reset game button which shows up after death
 	// this also resets values to original
 	Scene gameOverScene() {
 		resetGame();
-		return sceneMap.get(gameOverScene.KEY);
+		return sceneMap.get(GameOverScene.KEY);
 	}
 
 	// launch application

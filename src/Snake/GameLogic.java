@@ -9,7 +9,7 @@ public class GameLogic {
 
 
     // Create objects necessary for game
-    ArrayList<Snake> snake = new ArrayList<Snake>(20); // store the body of the snake
+    ArrayList<Snake> snake = new ArrayList<>(20); // store the body of the snake
     Fruit fruit = new Fruit(300, 300);
     int score = 0;
 
@@ -101,6 +101,7 @@ public class GameLogic {
         snakeHead.getChildren().add(bod);
     }
 
+
     // creating a new fruit object is pointless so I simply move it when it is eaten
     void createFruit() {
         fruit.setTranslateX(Math.random()*500);
@@ -117,9 +118,18 @@ public class GameLogic {
 
     }
 
-    void increaseScore(){
+    // Increase score
+    // Also multiplier for different difficulty
+    void increaseScore(int multiplier){
+        score += fruit.getPoints() * multiplier;
+    }
 
+    void increaseScore(){
         score += fruit.getPoints();
+    }
+
+    public void resetScore(){
+        score = 0;
     }
 
 
@@ -158,10 +168,7 @@ public class GameLogic {
             return true;
         }
 
-        if(snake.get(0).isDead) { // flag is raised in collisionDetection to mark snake eat its own body
-            return true;
-        }
-
-        return false;
+        // flag is raised in collisionDetection to mark snake eat its own body
+        return snake.get(0).isDead;
     }
 }

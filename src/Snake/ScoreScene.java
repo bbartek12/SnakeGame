@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.Pair;
@@ -25,7 +26,7 @@ public class ScoreScene {
         // Set to new listview to clear out list each in case it gets updated
         scoreList = null;
         scoreList = new ListView<>();
-        List<Pair<String, Integer>> pairList = database.getSortedScores();
+        List<Pair<String, Integer>> pairList = ScoresDatabase.getSortedScores();
 
         int rank = 1;
 
@@ -43,7 +44,11 @@ public class ScoreScene {
         VBox vBox = new VBox(4);
         Label title = new Label("Player Rankings");
         title.setAlignment(Pos.CENTER);
-        vBox.getChildren().addAll(title, scoreList, returnButton);
+        returnButton.setStyle("-fx-font-weight:bold; -fx-font-size: 30i");
+        returnButton.setPrefSize(200, 100);
+        HBox hbox = new HBox(returnButton);
+        hbox.setAlignment(Pos.CENTER);
+        vBox.getChildren().addAll(title, scoreList, hbox);
         return new Scene(vBox, 600, 600);
     }
 
