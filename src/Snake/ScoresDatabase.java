@@ -30,16 +30,14 @@ public class ScoresDatabase {
         return connection;
     }
 
-    // Runs test to see if there is a connection
-    // When function enters catch boolean is set to false
-    public static boolean isConnectedToServer(){
-        connect();
-        return isConnected;
-    }
-
     // Get all scores sorted
     public static List<Pair<String, Integer>> getSortedScores() throws SQLException {
         Connection connection = connect();
+
+        // Checks if server is on and if not prevents from rest of the function being executed
+        if(connection == null){
+            return new ArrayList<>();
+        }
 
         // Create a statement
         Statement statement = connection.createStatement();
@@ -67,6 +65,10 @@ public class ScoresDatabase {
 
         Connection connection = connect();
 
+        // Checks if server is on and if not prevents from rest of the function being executed
+        if(connection == null){
+            return;
+        }
         // Query to insert 2 values
         PreparedStatement statement = connection.prepareStatement("INSERT INTO UserScores (Score, Username) values  (?,?)");
 

@@ -43,10 +43,6 @@ public class ScoreScene {
     // Also a button to return to previous scene
     Scene createScoresScene() throws SQLException {
 
-        // If disconnected from server game will still work
-       if(!ScoresDatabase.isConnectedToServer()){
-           return new Scene(new VBox(),600, 600);
-       }
         fillUpListView();
 
         VBox vBox = new VBox(4);
