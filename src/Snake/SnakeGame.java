@@ -28,7 +28,6 @@ public class SnakeGame extends Application {
 
 	// Create objects necessary for game
 	GameLogic gameLogic = new GameLogic();
-	ScoresDatabase database = new ScoresDatabase();
 	Group root = new Group();
 	int setSpeed = 10; // The higher this number is the slower the snake
 
@@ -148,10 +147,7 @@ public class SnakeGame extends Application {
 		});
 
 		// closes game
-		quit.setOnAction(e->
-		{
-			Platform.exit();
-		});
+		quit.setOnAction(e-> Platform.exit());
 
 		// Enter scoreboard from gameover screen
 		scoreBoardBtn2.setOnAction(e->

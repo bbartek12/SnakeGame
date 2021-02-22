@@ -16,7 +16,6 @@ import java.util.List;
 
 public class ScoreScene {
     ListView<String> scoreList;
-    ScoresDatabase database = new ScoresDatabase();
     public static final String KEY = "ScoreScene"; // Key to retrieve scene
     Button returnButton = new Button("Return");
 
@@ -26,8 +25,11 @@ public class ScoreScene {
         // Set to new listview to clear out list each in case it gets updated
         scoreList = null;
         scoreList = new ListView<>();
+
+        // Get list of pair values from database
         List<Pair<String, Integer>> pairList = ScoresDatabase.getSortedScores();
 
+        // Starting rank of each player
         int rank = 1;
 
         // Insert strings into listview ranking players from high to low
@@ -39,16 +41,26 @@ public class ScoreScene {
 
 
     // Return listview scene of player rankings
+    // Also a button to return to previous scene
     Scene createScoresScene() throws SQLException {
         fillUpListView();
+
         VBox vBox = new VBox(4);
+
         Label title = new Label("Player Rankings");
         title.setAlignment(Pos.CENTER);
-        returnButton.setStyle("-fx-font-weight:bold; -fx-font-size: 30i");
+
+        // Make return button bigger and easier to read
+        returnButton.setStyle("-fx-font-weight:bold; -fx-font-size: 30");
         returnButton.setPrefSize(200, 100);
+
+        // Hbox to shift the button to the center
         HBox hbox = new HBox(returnButton);
         hbox.setAlignment(Pos.CENTER);
+
+        // Insert all objects into vbox
         vBox.getChildren().addAll(title, scoreList, hbox);
+
         return new Scene(vBox, 600, 600);
     }
 
