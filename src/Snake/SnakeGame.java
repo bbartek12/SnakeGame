@@ -2,11 +2,13 @@ package Snake;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -23,60 +25,160 @@ import java.util.Map;
 
 public class SnakeGame extends Application {
 
-	GameLogic gameLogic = new GameLogic();
+
 	// Create objects necessary for game
-//	ArrayList<Snake> snake = new ArrayList<Snake>(20); // store the body of the snake
+	GameLogic gameLogic = new GameLogic();
+	ScoresDatabase database = new ScoresDatabase();
 	Group root = new Group();
-//	Fruit fruit = new Fruit(300, 300);
-	int score = 0;
 	int setSpeed = 10; // The higher this number is the slower the snake
 
 	// Retrieve the two scenes, create a new one, and something to store the scenes
 	StartScene startScene = new StartScene();
 	GameOverScene gameOverScene = new GameOverScene();
+	ScoreScene scoreScene = new ScoreScene();
 	Scene scene = new Scene(root, 600, 600);
+	Scene previousScene; // used to get back from scoreboard
 	Map<String, Scene> sceneMap = new HashMap<>();
 
 	// Get the buttons from the scenes
-	Button btn = startScene.startBtn;
+	//---------------------------------------------------------------------
+
+	// Start scene
+	Button easyBtn = startScene.easyBtn;
+	Button mediumBtn = startScene.mediumBtn;
+	Button hardBtn= startScene.hardBtn;
+	Button scoreBoard = startScene.scoreBoardBtn;
+
+	// Score scene
+	Button previousSceneBtn = scoreScene.returnButton;
+
+	// Gameover scene
 	Button reset = gameOverScene.reset;
+	Button home = gameOverScene.homeScreen;
+	Button quit = gameOverScene.quit;
+	Button scoreBoardBtn2 = gameOverScene.scoreBoardBtn;
+	Button enterBtn = gameOverScene.enterBtn;
+
+	//---------------------------------------------------------------------
 
 	Label scoreText = new Label("Score: " + Integer.toString(gameLogic.score));
-	HashMap<String, Integer> playerScoreMap;
+	Label scoreGameOver = gameOverScene.playerScore;
+	TextField scoreInput = gameOverScene.userScoreInput;
 
+	// Update the current score when snake ate the fruit
 	void snakeAteUpdate(){
 		if(gameLogic.snakeAteFruit(root)) {
 			scoreText.setText("Score: " + Integer.toString(gameLogic.score));
 		}
 	}
 
+	// Sets scene to main game scene
+	void startGame(Stage primaryStage){
+		primaryStage.setScene(scene);
+		primaryStage.show();
+	}
+
 	@Override
-	public void start(Stage primarystage) {
+	public void start(Stage primaryStage) throws SQLException {
 
 		// Store scenes in hashmap to allow for swapping
 		sceneMap.put(startScene.KEY, startScene.createScene());
 		sceneMap.put(gameOverScene.KEY, gameOverScene.createScene());
+		sceneMap.put(scoreScene.KEY, scoreScene.createScoresScene());
 
-		score = 0; // set score to 0 at start of game
+		gameLogic.score = 0; // set score to 0 at start of game
 
 		scoreText.setStyle("-fx-font-size:30;");
 		scoreText.relocate(scene.getWidth()/2-70, 0); // Put score near middle of screen
 
-		primarystage.setTitle("Snake");
-		primarystage.setScene(sceneMap.get(StartScene.KEY)); // set to menu screen
+		primaryStage.setTitle("Snake");
+		primaryStage.setScene(sceneMap.get(StartScene.KEY)); // set to menu screen
+
+		// If server is disconnected then block database related functionalities
+        if(!database.isConnected){
+        	scoreBoard.setDisable(true);
+        	scoreBoardBtn2.setDisable(true);
+        	scoreInput.setDisable(true);
+        	enterBtn.setDisable(true);
+		}
 
 		// Button to start game
-		btn.setOnAction(e->
+		easyBtn.setOnAction(e->
 		{
-			primarystage.setScene(scene);
-			primarystage.show();
+			setSpeed = StartScene.EASY;
+			startGame(primaryStage);
+		});
+
+		// Button to start game
+		mediumBtn.setOnAction(e->
+		{
+			setSpeed = StartScene.MEDIUM;
+			startGame(primaryStage);
+		});
+
+		// Button to start game
+		hardBtn.setOnAction(e->
+		{
+			setSpeed = StartScene.HARD;
+			startGame(primaryStage);
+		});
+
+		// Button to see ranking of all players
+		scoreBoard.setOnAction(e->
+		{
+			previousScene = primaryStage.getScene();
+			primaryStage.setScene(sceneMap.get(ScoreScene.KEY));
+			primaryStage.show();
+		});
+
+
+		// Go back from scoreboard scene
+		previousSceneBtn.setOnAction(e ->
+		{
+			primaryStage.setScene(previousScene);
+			primaryStage.show();
 		});
 
 		// resets game after a death
 		reset.setOnAction(e->
 		{
-			primarystage.setScene(scene);
-			primarystage.show();
+			startGame(primaryStage);
+		});
+
+		// closes game
+		quit.setOnAction(e->
+		{
+			Platform.exit();
+		});
+
+		// Enter scoreboard from gameover screen
+		scoreBoardBtn2.setOnAction(e->
+		{
+			previousScene = primaryStage.getScene();
+			primaryStage.setScene(sceneMap.get(ScoreScene.KEY));
+			primaryStage.show();
+		});
+
+		home.setOnAction(e->
+		{
+			resetGame();
+			primaryStage.setScene(sceneMap.get(startScene.KEY));
+			primaryStage.show();
+		});
+
+		enterBtn.setOnAction(e->
+		{
+
+			try {
+			    // Insert players score
+				database.insert(scoreInput.getText(), gameLogic.score);
+				sceneMap.put(ScoreScene.KEY, scoreScene.createScoresScene());
+			}
+			catch (SQLException throwables) {
+				throwables.printStackTrace();
+			}
+			enterBtn.setDisable(true);
+
 		});
 
 		// Set default values for snake and position of fruit
@@ -130,8 +232,9 @@ public class SnakeGame extends Application {
 						//gameLogic.snakeAteFruit(root);
 						snakeAteUpdate();
 						if(gameLogic.isPlayerDead(scene)) {
-							primarystage.setScene(gameOverScene());
-							primarystage.show();
+							scoreGameOver.setText(String.valueOf(gameLogic.score));
+							primaryStage.setScene(gameOverScene());
+							primaryStage.show();
 						}
 					}
 				}
@@ -139,7 +242,7 @@ public class SnakeGame extends Application {
 			}
 		}.start();
 
-		primarystage.show();
+		primaryStage.show();
 	}
 
 
@@ -158,6 +261,8 @@ public class SnakeGame extends Application {
 		root.getChildren().add(gameLogic.fruit);
 		gameLogic.createFruit();
 
+		enterBtn.setDisable(false);
+
 		// Starts snake to original size
 		gameLogic.growSnake(root);
 		gameLogic.growSnake(root);
@@ -173,25 +278,6 @@ public class SnakeGame extends Application {
 
 	// launch application
 	public static void main(String[] args) {
-
-
-			// Connect to database
-		//	Connection connection = ScoresDatabase.connect();
-//		try {
-//			HashMap<String, Integer> playerScoreMap = ScoresDatabase.getSortedScores();
-//			for(Map.Entry pair : playerScoreMap.entrySet()){
-//				System.out.println(pair.getKey());
-//				System.out.println( pair.getValue());
-//			}
-//		//	ScoresDatabase.insert("test2", 399);
-//			System.out.println("234242");
-//		} catch (SQLException throwables) {
-//			throwables.printStackTrace();
-//		}
-
-
-		//	System.out.println(Integer.toString(playerScoreMap.get("test")));
-
 		launch(args);
 	}
 

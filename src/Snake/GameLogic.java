@@ -143,8 +143,6 @@ public class GameLogic {
 
         for(int i = 2; i < snake.size()-1; i++) {
             if(Math.abs(snake.get(0).getTranslateX()  - snake.get(i).getTranslateX()) < 0.0001 && Math.abs(snake.get(0).getTranslateY() - snake.get(i).getTranslateY()) < 0.0001) {
-                System.out.println("yay"); //DEBUG
-                // Platform.exit();
                 snake.get(0).isDead = true; // game over
             }
         }
@@ -157,12 +155,10 @@ public class GameLogic {
         // When the snake head goes outside the bounds
         if(snake.get(0).getTranslateX() > scene.getWidth() || snake.get(0).getTranslateX() < 0
                 || snake.get(0).getTranslateY() > scene.getHeight() || snake.get(0).getTranslateY() < 0 ) {
-            score = 0;
             return true;
         }
 
         if(snake.get(0).isDead) { // flag is raised in collisionDetection to mark snake eat its own body
-            score = 0;
             return true;
         }
 
