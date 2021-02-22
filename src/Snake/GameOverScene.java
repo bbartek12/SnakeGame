@@ -13,14 +13,15 @@ import javafx.scene.text.Text;
 
 public class GameOverScene {
 
+    public static final String KEY = "gameOver"; // key to retrieve scene
+
     // Create main buttons
     Button reset = new Button("Restart");
     Button homeScreen = new Button("Home");
     Button quit = new Button("Quit");
 
-    Label playerScore = new Label("Score: ");
 
-    // Textfield, a label, and hbox for positioning
+    // Everything for user input
     TextField userScoreInput = new TextField();
     Text userNameLabel = new Text("Enter Your Name For Leadboard: ");
     Button enterBtn = new Button("Enter");
@@ -30,10 +31,11 @@ public class GameOverScene {
     Button scoreBoardBtn = new Button("Scoreboard");
     HBox hBoxScore = new HBox(scoreBoardBtn);
 
+    // Labels  to help player know what is going on
     Text gameOver = new Text("Game Over");
-    VBox vbox = new VBox(gameOver, playerScore, hBoxInput, reset, homeScreen, quit, hBoxScore);
+    Label playerScore = new Label("Score: ");
 
-    public static final String KEY = "gameOver"; // key to retrieve scene
+    VBox vbox = new VBox(gameOver, playerScore, hBoxInput, reset, homeScreen, quit, hBoxScore); // store everything create above
 
     public GameOverScene() {
 

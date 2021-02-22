@@ -36,7 +36,6 @@ public class ScoreScene {
         for(Pair<String, Integer> pair : pairList) {
             scoreList.getItems().add(rank++ + ". " + pair.getKey() + " " + pair.getValue());
         }
-
     }
 
 

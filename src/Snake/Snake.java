@@ -4,16 +4,11 @@ import javafx.scene.shape.Rectangle;
 
 public class Snake extends Rectangle {
 
- //   Main main = new Main();
-
     // death flag
     boolean isDead = false;
 
     // movement directions
-    boolean up = false;
-    boolean down = false;
-    boolean left = false;
-    boolean right = false;
+    boolean up, down, left, right;
 
     // length of snake
     int length;
